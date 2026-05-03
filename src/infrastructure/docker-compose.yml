@@ -1,0 +1,67 @@
+services:
+  kafka:
+    image: apache/kafka:latest
+    container_name: kafka
+    ports:
+      # Your local Spring Boot services connect to Kafka through this port.
+      - "9094:9094"
+    environment:
+      KAFKA_NODE_ID: 1
+
+      # Kafka runs without ZooKeeper in KRaft mode.
+      KAFKA_PROCESS_ROLES: broker,controller
+
+      # Internal controller configuration for the single Kafka node.
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+
+      # Kafka listeners:
+      # kafka:9092       -> used by other Docker containers
+      # kafka:9093       -> used internally by Kafka controller
+      # 0.0.0.0:9094     -> exposed to your host machine
+      KAFKA_LISTENERS: PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093,PLAINTEXT_HOST://0.0.0.0:9094
+
+      # Advertised addresses:
+      # kafka:9092       -> Docker containers use this
+      # localhost:9094   -> local Spring Boot apps use this
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9094
+
+      # Listener protocol mapping.
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+
+      # Kafka controller listener.
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      # Broker-to-broker communication listener.
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      # Required for a single-node development Kafka setup.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      # Allows Kafka to create topics automatically when your app first uses them.
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+    networks:
+      - shopping-platform-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka_ui
+    ports:
+      # Open Kafka UI in your browser at http://localhost:8090
+      - "8090:8080"
+    environment:
+      # Name shown inside Kafka UI.
+      KAFKA_CLUSTERS_0_NAME: local-kafka
+
+      # Kafka UI runs inside Docker, so it connects to Kafka using the Docker-internal address.
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - shopping-platform-network
+
+networks:
+  shopping-platform-network:
+    external: true

@@ -1,0 +1,1 @@
+This is the inventory service of the Shopping Platform Microservices
