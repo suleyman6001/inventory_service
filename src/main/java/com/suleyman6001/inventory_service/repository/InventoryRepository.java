@@ -11,14 +11,21 @@ import java.util.Optional;
 
 @Repository
 public interface InventoryRepository extends JpaRepository<InventoryItem, Integer> {
-    Optional<InventoryItem> findByProductCode(String productCode);
+    InventoryItem findByProductCode(String productCode);
     List<InventoryItem> findAllByProductName(String productName);
     Boolean existsByProductCode(String productCode);
 
+    /**
+     * Atomic reservation logic to avoid race conditions
+     * @param productCode
+     * @param requestedQuantity
+     * @return
+     */
     @Modifying
     @Query("""
     update InventoryItem i
-    set i.availableQuantity = i.availableQuantity - :requestedQuantity
+    set i.availableQuantity = i.availableQuantity - :requestedQuantity,
+        i.reservedQuantity = i.reservedQuantity + :requestedQuantity
     where i.productCode = :productCode
     and i.availableQuantity >= :requestedQuantity
 """)

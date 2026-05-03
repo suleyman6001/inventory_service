@@ -1,7 +1,7 @@
 package com.suleyman6001.inventory_service.service;
 
-import com.suleyman6001.inventory_service.dto.request.InventoryItemDto;
-import com.suleyman6001.inventory_service.dto.response.ItemCreationResponseDto;
+import com.suleyman6001.inventory_service.dto.request.ItemCreationRequestDto;
+import com.suleyman6001.inventory_service.dto.response.ItemResponseDto;
 import com.suleyman6001.inventory_service.dto.request.ReservationRequestDto;
 import com.suleyman6001.inventory_service.dto.response.ReservationResponseDto;
 import com.suleyman6001.inventory_service.entity.InventoryItem;
@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 public class InventoryService {
@@ -24,13 +22,28 @@ public class InventoryService {
         this.inventoryRepository = inventoryRepository;
     }
 
-    public InventoryItem getInventoryItem(String productCode) {
+    public ItemResponseDto getInventoryItem(String productCode) {
         logger.info("Retrieving the inventory item with the given product code");
         String normalizedProductCode = productCode.trim().toUpperCase();
-        Optional<InventoryItem> inventoryItemOptional = inventoryRepository.findByProductCode(normalizedProductCode);
 
-        return inventoryItemOptional.orElse(null);
+        ItemResponseDto itemResponseDto = new ItemResponseDto();
+        itemResponseDto.setProductCode(normalizedProductCode);
 
+        if (!inventoryRepository.existsByProductCode(normalizedProductCode)) {
+            itemResponseDto.setMessage("Item with given product-code does not exist!");
+            return itemResponseDto;
+        }
+
+        InventoryItem item = inventoryRepository.findByProductCode(normalizedProductCode);
+
+        itemResponseDto.setMessage("Item with given product-code retrieved successfully");
+        itemResponseDto.setItemId(item.getId());
+        itemResponseDto.setProductName(item.getProductName());
+        itemResponseDto.setPrice(item.getPrice());
+        itemResponseDto.setAvailableQuantity(item.getAvailableQuantity());
+        itemResponseDto.setReservedQuantity(item.getReservedQuantity());
+
+        return itemResponseDto;
     }
 
     @Transactional
@@ -69,29 +82,37 @@ public class InventoryService {
     }
 
     @Transactional
-    public ItemCreationResponseDto createInventoryItem(InventoryItemDto inventoryItemDto) {
+    public ItemResponseDto createInventoryItem(ItemCreationRequestDto itemCreationRequestDto) {
         logger.info("Attempting to reserve the requested quantity of the given product number");
 
-        ItemCreationResponseDto creationResponseDto = new ItemCreationResponseDto();
-        String normalizedProductCode = inventoryItemDto.getProductCode().trim().toUpperCase();
+        ItemResponseDto creationResponseDto = new ItemResponseDto();
+        String normalizedProductCode = itemCreationRequestDto.getProductCode().trim().toUpperCase();
 
         creationResponseDto.setProductCode(normalizedProductCode);
 
         if (inventoryRepository.existsByProductCode(normalizedProductCode)) {
-            creationResponseDto.setCreated(false);
-            creationResponseDto.setMessage("Item with given product number already exists!");
+            creationResponseDto.setMessage("Item creation unsuccessful. Item with given product number already exists!");
             return creationResponseDto;
         }
 
+        // Creating and persisting inventory item
         InventoryItem item = new InventoryItem();
 
         item.setProductCode(normalizedProductCode);
-        item.setProductName(inventoryItemDto.getProductName());
-        item.setAvailableQuantity(inventoryItemDto.getAvailableQuantity());
+        item.setProductName(itemCreationRequestDto.getProductName());
+        item.setPrice(itemCreationRequestDto.getPrice());
+        item.setAvailableQuantity(itemCreationRequestDto.getAvailableQuantity());
+        item.setReservedQuantity(0);
 
         inventoryRepository.save(item);
-        creationResponseDto.setCreated(true);
+
+        // Preparing a response DTO
         creationResponseDto.setMessage("Item created successfully!");
+        creationResponseDto.setItemId(item.getId());
+        creationResponseDto.setProductName(item.getProductName());
+        creationResponseDto.setPrice(item.getPrice());
+        creationResponseDto.setAvailableQuantity(item.getAvailableQuantity());
+        creationResponseDto.setReservedQuantity(item.getReservedQuantity());
 
         return creationResponseDto;
     }

@@ -1,35 +1,24 @@
-package com.suleyman6001.inventory_service.entity;
+package com.suleyman6001.inventory_service.dto.response;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
 
-@Entity
-@Table(name = "inventory_item")
-public class InventoryItem {
+public class ItemResponseDto {
+    private String message;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(unique = true, nullable = false)
+    private Long itemId;
     private String productCode;
-
-    @Column(nullable = false)
     private String productName;
-
-    @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
-
-    @Column(nullable = false)
     private Integer availableQuantity;
-
-    @Column(nullable = false)
     private Integer reservedQuantity;
 
-    public InventoryItem() {
+
+    public ItemResponseDto() {
     }
 
-    public InventoryItem(String productCode, String productName, BigDecimal price, Integer availableQuantity, Integer reservedQuantity) {
+    public ItemResponseDto(String message, Long itemId, String productCode, String productName, BigDecimal price, Integer availableQuantity, Integer reservedQuantity) {
+        this.message = message;
+        this.itemId = itemId;
         this.productCode = productCode;
         this.productName = productName;
         this.price = price;
@@ -37,8 +26,20 @@ public class InventoryItem {
         this.reservedQuantity = reservedQuantity;
     }
 
-    public Long getId() {
-        return id;
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Long getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
     }
 
     public String getProductCode() {
@@ -79,5 +80,18 @@ public class InventoryItem {
 
     public void setReservedQuantity(Integer reservedQuantity) {
         this.reservedQuantity = reservedQuantity;
+    }
+
+    @Override
+    public String toString() {
+        return "ItemCreationResponseDto{" +
+                "message='" + message + '\'' +
+                ", itemId=" + itemId +
+                ", productCode='" + productCode + '\'' +
+                ", productName='" + productName + '\'' +
+                ", price=" + price +
+                ", availableQuantity=" + availableQuantity +
+                ", reservedQuantity=" + reservedQuantity +
+                '}';
     }
 }

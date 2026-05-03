@@ -1,11 +1,10 @@
 package com.suleyman6001.inventory_service.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
-public class InventoryItemDto {
+import java.math.BigDecimal;
+
+public class ItemCreationRequestDto {
 
     @NotBlank(message = "Product code is required")
     @Size(max = 100, message = "Product code must not exceed 100 characters")
@@ -14,17 +13,26 @@ public class InventoryItemDto {
             message = "Product code must contain only letters, numbers, hyphens, and underscores"
     )
     private String productCode;
+
     @NotBlank
     private String productName;
+
     @NotNull
+    @DecimalMin(value = "0.00", inclusive = false)
+    @Digits(integer = 10, fraction = 2)
+    private BigDecimal price;
+
+    @NotNull
+    @Min(0)
     private Integer availableQuantity;
 
-    public InventoryItemDto() {
+    public ItemCreationRequestDto() {
     }
 
-    public InventoryItemDto(String productCode, String productName, Integer availableQuantity) {
+    public ItemCreationRequestDto(String productCode, String productName, BigDecimal price, Integer availableQuantity) {
         this.productCode = productCode;
         this.productName = productName;
+        this.price = price;
         this.availableQuantity = availableQuantity;
     }
 
@@ -44,6 +52,14 @@ public class InventoryItemDto {
         this.productName = productName;
     }
 
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
     public Integer getAvailableQuantity() {
         return availableQuantity;
     }
@@ -54,7 +70,11 @@ public class InventoryItemDto {
 
     @Override
     public String toString() {
-        return "{productCode : " + productCode + ", availableQuantity : " + availableQuantity + "}";
+        return "ItemCreationRequestDto{" +
+                "productCode='" + productCode + '\'' +
+                ", productName='" + productName + '\'' +
+                ", price=" + price +
+                ", availableQuantity=" + availableQuantity +
+                '}';
     }
-
 }
