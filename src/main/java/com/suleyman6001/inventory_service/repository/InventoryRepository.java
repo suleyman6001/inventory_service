@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface InventoryRepository extends JpaRepository<InventoryItem, Integer> {
-    InventoryItem findByProductCode(String productCode);
+public interface InventoryRepository extends JpaRepository<InventoryItem, Long> {
+    Optional<InventoryItem> findByProductCode(String productCode);
     List<InventoryItem> findAllByProductName(String productName);
     Boolean existsByProductCode(String productCode);
 

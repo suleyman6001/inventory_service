@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class InventoryService {
     private static final Logger logger = LoggerFactory.getLogger(InventoryService.class);
@@ -29,12 +31,14 @@ public class InventoryService {
         ItemResponseDto itemResponseDto = new ItemResponseDto();
         itemResponseDto.setProductCode(normalizedProductCode);
 
-        if (!inventoryRepository.existsByProductCode(normalizedProductCode)) {
+        Optional<InventoryItem> itemOptional = inventoryRepository.findByProductCode(normalizedProductCode);
+
+        if (itemOptional.isEmpty()) {
             itemResponseDto.setMessage("Item with given product-code does not exist!");
             return itemResponseDto;
         }
 
-        InventoryItem item = inventoryRepository.findByProductCode(normalizedProductCode);
+        InventoryItem item = itemOptional.get();
 
         itemResponseDto.setMessage("Item with given product-code retrieved successfully");
         itemResponseDto.setItemId(item.getId());
