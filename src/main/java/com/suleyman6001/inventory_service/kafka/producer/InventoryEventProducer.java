@@ -1,7 +1,6 @@
 package com.suleyman6001.inventory_service.kafka.producer;
 
 import com.suleyman6001.inventory_service.kafka.event.InventoryItemReservationResultEvent;
-import com.suleyman6001.inventory_service.service.InventoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,7 @@ public class InventoryEventProducer {
     }
 
     public void sendInventoryItemReservationResultEvent(InventoryItemReservationResultEvent reservationResultEvent) {
-        kafkaTemplate.send(reservationResultTopic, String.valueOf(reservationResultEvent.orderId()), reservationResultEvent);
+        kafkaTemplate.send(reservationResultTopic, String.valueOf(reservationResultEvent.getOrderId()), reservationResultEvent);
     }
 
 }
