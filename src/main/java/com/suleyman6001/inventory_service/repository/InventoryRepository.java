@@ -23,11 +23,11 @@ public interface InventoryRepository extends JpaRepository<InventoryItem, Long> 
      */
     @Modifying
     @Query("""
-    update InventoryItem i
-    set i.availableQuantity = i.availableQuantity - :requestedQuantity,
+    UPDATE InventoryItem i
+    SET i.availableQuantity = i.availableQuantity - :requestedQuantity,
         i.reservedQuantity = i.reservedQuantity + :requestedQuantity
-    where i.productCode = :productCode
-    and i.availableQuantity >= :requestedQuantity
+    WHERE i.productCode = :productCode
+    AND i.availableQuantity >= :requestedQuantity
 """)
     int reserveStock(String productCode, Integer requestedQuantity);
 

@@ -3,7 +3,7 @@ services:
     image: apache/kafka:latest
     container_name: kafka
     ports:
-      # Your local Spring Boot services connect to Kafka through this port.
+      # Local Spring Boot services connect to Kafka through this port.
       - "9094:9094"
     environment:
       KAFKA_NODE_ID: 1
@@ -15,14 +15,14 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
 
       # Kafka listeners:
-      # kafka:9092       -> used by other Docker containers
-      # kafka:9093       -> used internally by Kafka controller
-      # 0.0.0.0:9094     -> exposed to your host machine
+      # kafka:9092 is used by other Docker containers
+      # kafka:9093 is used internally by Kafka controller
+      # 0.0.0.0:9094 is exposed to your host machine
       KAFKA_LISTENERS: PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093,PLAINTEXT_HOST://0.0.0.0:9094
 
       # Advertised addresses:
-      # kafka:9092       -> Docker containers use this
-      # localhost:9094   -> local Spring Boot apps use this
+      # kafka:9092       is used by Docker containers
+      # localhost:9094   is used by local Spring Boot apps
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9094
 
       # Listener protocol mapping.
@@ -39,7 +39,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
 
-      # Allows Kafka to create topics automatically when your app first uses them.
+      # With this, Kafka can create topics automatically when the app first uses them.
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
     networks:
@@ -49,7 +49,7 @@ services:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka_ui
     ports:
-      # Open Kafka UI in your browser at http://localhost:8090
+      # Kafka UI can be opened in the browser at http://localhost:8090
       - "8090:8080"
     environment:
       # Name shown inside Kafka UI.

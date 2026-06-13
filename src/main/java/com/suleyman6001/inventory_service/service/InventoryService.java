@@ -5,6 +5,7 @@ import com.suleyman6001.inventory_service.dto.response.ItemResponseDto;
 import com.suleyman6001.inventory_service.dto.request.ReservationRequestDto;
 import com.suleyman6001.inventory_service.dto.response.ReservationResponseDto;
 import com.suleyman6001.inventory_service.entity.InventoryItem;
+import com.suleyman6001.inventory_service.mapper.DtoMapper;
 import com.suleyman6001.inventory_service.repository.InventoryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,24 +29,22 @@ public class InventoryService {
         logger.info("Retrieving the inventory item with the given product code");
         String normalizedProductCode = productCode.trim().toUpperCase();
 
-        ItemResponseDto itemResponseDto = new ItemResponseDto();
-        itemResponseDto.setProductCode(normalizedProductCode);
-
+        ItemResponseDto itemResponseDto;
         Optional<InventoryItem> itemOptional = inventoryRepository.findByProductCode(normalizedProductCode);
 
+        // Object does not exist
         if (itemOptional.isEmpty()) {
+            itemResponseDto = new ItemResponseDto();
+            itemResponseDto.setProductCode(normalizedProductCode);
             itemResponseDto.setMessage("Item with given product-code does not exist!");
+
             return itemResponseDto;
         }
 
+        // Object retrieved
         InventoryItem item = itemOptional.get();
-
+        itemResponseDto = DtoMapper.fromEntityToDto(item);
         itemResponseDto.setMessage("Item with given product-code retrieved successfully");
-        itemResponseDto.setItemId(item.getId());
-        itemResponseDto.setProductName(item.getProductName());
-        itemResponseDto.setPrice(item.getPrice());
-        itemResponseDto.setAvailableQuantity(item.getAvailableQuantity());
-        itemResponseDto.setReservedQuantity(item.getReservedQuantity());
 
         return itemResponseDto;
     }
@@ -86,37 +85,39 @@ public class InventoryService {
     }
 
     @Transactional
-    public ItemResponseDto createInventoryItem(ItemCreationRequestDto itemCreationRequestDto) {
-        logger.info("Attempting to reserve the requested quantity of the given product number");
+    public ItemResponseDto createOrUpdateInventoryItem(ItemCreationRequestDto itemCreationRequestDto) {
+        logger.info("Attempting to create or update quantity of the inventory item");
 
-        ItemResponseDto creationResponseDto = new ItemResponseDto();
+        ItemResponseDto creationResponseDto;
         String normalizedProductCode = itemCreationRequestDto.getProductCode().trim().toUpperCase();
 
-        creationResponseDto.setProductCode(normalizedProductCode);
+        Optional<InventoryItem> itemOptional = inventoryRepository.findByProductCode(normalizedProductCode);
 
-        if (inventoryRepository.existsByProductCode(normalizedProductCode)) {
-            creationResponseDto.setMessage("Item creation unsuccessful. Item with given product number already exists!");
+        // Update the available quantity if the item already exists
+        if (itemOptional.isPresent()) {
+            InventoryItem inventoryItem = itemOptional.get();
+            // updating the properties of the inventory item
+            inventoryItem.setProductName(itemCreationRequestDto.getProductName());
+            inventoryItem.setPrice(itemCreationRequestDto.getPrice());
+            inventoryItem.setAvailableQuantity(itemCreationRequestDto.getAvailableQuantity());
+
+            inventoryRepository.save(inventoryItem);
+
+            creationResponseDto = DtoMapper.fromEntityToDto(inventoryItem);
+            creationResponseDto.setMessage("Item with given product number already exists! Item quantity has been updated");
+
             return creationResponseDto;
         }
 
         // Creating and persisting inventory item
-        InventoryItem item = new InventoryItem();
-
-        item.setProductCode(normalizedProductCode);
-        item.setProductName(itemCreationRequestDto.getProductName());
-        item.setPrice(itemCreationRequestDto.getPrice());
-        item.setAvailableQuantity(itemCreationRequestDto.getAvailableQuantity());
+        InventoryItem item = DtoMapper.fromDtoToEntity(itemCreationRequestDto);
         item.setReservedQuantity(0);
 
         inventoryRepository.save(item);
 
         // Preparing a response DTO
+        creationResponseDto = DtoMapper.fromEntityToDto(item);
         creationResponseDto.setMessage("Item created successfully!");
-        creationResponseDto.setItemId(item.getId());
-        creationResponseDto.setProductName(item.getProductName());
-        creationResponseDto.setPrice(item.getPrice());
-        creationResponseDto.setAvailableQuantity(item.getAvailableQuantity());
-        creationResponseDto.setReservedQuantity(item.getReservedQuantity());
 
         return creationResponseDto;
     }
