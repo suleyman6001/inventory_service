@@ -40,7 +40,6 @@ public class InventoryController {
     @PostMapping("/items")
     public ResponseEntity<ItemResponseDto> createOrUpdateInventoryItem(@Valid @RequestBody ItemCreationRequestDto itemCreationRequestDto) {
         ItemResponseDto responseDto = inventoryService.createOrUpdateInventoryItem(itemCreationRequestDto);
-
         return ResponseEntity.ok(responseDto);
     }
 }

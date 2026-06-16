@@ -1,9 +1,6 @@
 package com.suleyman6001.inventory_service.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public class ReservationRequestDto {
     @NotBlank(message = "Product code is required")
@@ -14,6 +11,7 @@ public class ReservationRequestDto {
     )
     private String productCode;
     @NotNull
+    @Min(1)
     private Integer requestedQuantity;
 
     public ReservationRequestDto() {
