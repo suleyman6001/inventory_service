@@ -37,6 +37,15 @@ public class InventoryItem {
         this.reservedQuantity = reservedQuantity;
     }
 
+    public InventoryItem(Long id, String productCode, String productName, BigDecimal price, Integer availableQuantity, Integer reservedQuantity) {
+        this.id = id;
+        this.productCode = productCode;
+        this.productName = productName;
+        this.price = price;
+        this.availableQuantity = availableQuantity;
+        this.reservedQuantity = reservedQuantity;
+    }
+
     public Long getId() {
         return id;
     }
